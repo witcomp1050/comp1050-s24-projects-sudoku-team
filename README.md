@@ -12,7 +12,7 @@ Once completed you will be presented with either a winning screen where you can 
 
 ## Acknowledgements
 
-We would like to express our gratitude to our professor for his guidance throughout this project. 
+We would like to express our gratitude to our professor Mr. Gyllinsky for his guidance throughout this project. 
 
 Additionally, we extend our thanks to the JavaFX community for the resources and support provided. 
 
