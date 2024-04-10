@@ -6,7 +6,7 @@ There are 5 of us collaborating on creating a team-variant of sudoku.
 
 ## How to Play
 
-When launching the application you will be presented with a start screen, once you select play you will be shown a suduko grid where you can click any blank tiles to edit the value. but be sure to complete it before the timer ends!
+When launching the application you will be presented with a start screen, once you select play you will be shown a sudoku grid where you can click any blank tiles to edit the value. but be sure to complete it before the timer ends!
 
 Once completed you will be presented with either a winning screen where you can brag to your friends about how you where able to complete our puzzle before the timer ended, or a losing screen where unfortunately you werent fast enough and have to try again :)
 
