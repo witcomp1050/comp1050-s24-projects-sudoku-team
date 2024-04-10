@@ -11,6 +11,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public class Main extends Application {
+	//initializes  the board and sets the dedicated size
     private static final int SIZE = 9;
     private int[][] board;
 
@@ -18,20 +19,23 @@ public class Main extends Application {
     public void start(Stage primaryStage) {
         Main sudoku = new Main();
         sudoku.fillValues();
-
-        GridPane grid = new GridPane();
-        grid.setHgap(6);
-        grid.setVgap(6);
         
-        // Fill the grid with values and buttons for zeros
+        //creates the grid enables the gaps for resizing and grid lines
+        GridPane grid = new GridPane();
+        grid.setHgap(0);
+        grid.setVgap(0);
+        grid.setGridLinesVisible(false);
+        
+        // fills the grid with buttons
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
+            	//uses the fillRemaining to replace the zero'd values with a button
                 if (sudoku.board[i][j] == 0) {
                     Button button = new Button("");
                     button.setPrefWidth(60);
                     button.setPrefHeight(60);
-                    button.setStyle("-fx-background-color: white;");
-                    button.setStyle("-fx-cursor-color: blue;");
+                    button.setStyle("-fx-background: transparent;");
+                    button.setStyle("-fx-cursor-color: transparent;");
                     int finalI = i;
                     int finalJ = j;
                     button.setOnAction(new EventHandler<ActionEvent>() {
@@ -40,22 +44,28 @@ public class Main extends Application {
                     	        // what happens when the button is clicked
                     	        Button clickedButton = (Button) event.getSource();
                     	        String buttonText = clickedButton.getText();
-                    	        int currentValue = 0;
+                    	        int currentValue = 0; 
                     	        if (!buttonText.isEmpty()) {
-                    	            currentValue = Integer.parseInt(buttonText);
+                    	            currentValue = Integer.parseInt(buttonText); // if the button value is empty, set value to 0
                     	        }
-                    	        int newValue = (currentValue % 9) + 1;
-                    	        clickedButton.setText(Integer.toString(newValue));
-                    	        sudoku.board[finalI][finalJ] = newValue; // Update the board array
+                    	        int newValue;
+                    	        if (currentValue == 9) {            // allows the number to be removed after 9        	           
+                    	            newValue = 0;                   // for an empty button if the player needs to remove the number
+                    	            clickedButton.setText("");
+                    	        } else {
+                    	            newValue = currentValue + 1;    // if the button does not =0 increment by 1 till 9
+                    	            clickedButton.setText(Integer.toString(newValue));
+                    	        }
+                    	        sudoku.board[finalI][finalJ] = newValue; // update the board array
                     	        
-                    	        // Check if the entered value is correct
+                    	        // check if the entered value is correct
                     	        boolean isCorrect = isCorrect(finalI, finalJ, newValue, sudoku);
                     	        
                     	        if (!isCorrect) {
-                    	            // If the entered value is incorrect, revert the color
+                    	            // allows the green color to get removed if a button change results in an incorrect number
                     	            revertColor(finalI, finalJ, grid, sudoku);
                     	        }
-                    	        
+                    	        // uses the completed guide of the puzzle to end the game when all values are filled
                     	        checkCompleted(grid, sudoku);
                     	        if (isComplete(sudoku)) {
                     	            primaryStage.setScene(createWinScene(primaryStage));
@@ -64,30 +74,32 @@ public class Main extends Application {
                     	});
                     grid.add(button, j, i);
                 } else {
+                	//if the value is not 0, disables the button and displays the given value 
                     Button button = new Button(Integer.toString(sudoku.board[i][j]));
                     button.setPrefWidth(60);
                     button.setPrefHeight(60);
                     button.setStyle("-fx-background-color: transparent;");
-                    button.setDisable(true); // Disable buttons for non-zero cells
+                    button.setStyle("-fx-boreder: transparent;");
+                    button.setDisable(true); 
                     grid.add(button, j, i);
                 }
             }
         }
-
-        Scene scene = new Scene(grid, 600, 650);
+        //builds the scene and title for the puzzle to display on 
+        Scene scene = new Scene(grid, 540, 600);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Sudoku Puzzle");
         primaryStage.show();
     }
 
     public Main() {
-        this.board = new int[SIZE][SIZE];
+        this.board = new int[SIZE][SIZE]; // takes the size to create a grid for the board
     }
 
     public void fillValues() {
         fillDiagonalBoxes();
         fillRemaining(0, 3);
-        removeDigits(40); // changes the number of zeros present for difficulty
+        removeDigits(30); // use to change the number of zeros present 
     }
 
     public void fillDiagonalBoxes() {
@@ -188,6 +200,7 @@ public class Main extends Application {
     }
 
     public void checkCompleted(GridPane grid, Main sudoku) {
+    	// uses the row checker to turn any completed row green 
         for (int i = 0; i < SIZE; i++) {
             if (isCompletedRow(i, sudoku)) {
                 for (int j = 0; j < SIZE; j++) {
@@ -195,7 +208,7 @@ public class Main extends Application {
                     button.setStyle("-fx-background-color: lightgreen;");
                 } 
             }
-            
+         // uses the column checker to turn any completed column green 
             if (isCompletedColumn(i, sudoku)) {
                 for (int j = 0; j < SIZE; j++) {
                     Button button = (Button) getNodeFromGridPane(grid, i, j);
@@ -203,7 +216,7 @@ public class Main extends Application {
                 }
             }
         }
-        
+     // uses the box checker to turn any completed box green 
         for (int i = 0; i < SIZE; i += 3) {
             for (int j = 0; j < SIZE; j += 3) {
                 if (isCompletedBox(i, j, sudoku)) {
@@ -220,7 +233,8 @@ public class Main extends Application {
 
     public boolean isCompletedRow(int row, Main sudoku) {
         boolean[] nums = new boolean[SIZE];
-        for (int i = 0; i < SIZE; i++) {
+        // goes through the row and checks if the number input is seen before in the row
+        for (int i = 0; i < SIZE; i++) {        
             int num = sudoku.board[row][i];
             if (num != 0 && !nums[num - 1]) {
                 nums[num - 1] = true;
@@ -232,7 +246,7 @@ public class Main extends Application {
         }
         return true;
     }
-
+ // goes through the column and checks if the number input is seen before in the column
     public boolean isCompletedColumn(int col, Main sudoku) {
         boolean[] nums = new boolean[SIZE];
         for (int i = 0; i < SIZE; i++) {
@@ -247,7 +261,7 @@ public class Main extends Application {
         }
         return true;
     }
-
+ // goes through the box and checks if the number input is seen before in the box
     public boolean isCompletedBox(int row, int col, Main sudoku) {
         boolean[] nums = new boolean[SIZE];
         for (int i = row; i < row + 3; i++) {
@@ -266,9 +280,10 @@ public class Main extends Application {
     }
 
     public boolean isComplete(Main sudoku) {
+    	// determines if the game is completed 
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
-                if (sudoku.board[i][j] == 0) {
+                if (!isCompletedRow(i, sudoku) && !isCompletedColumn(j, sudoku) && !isCompletedBox(i - i % 3, j - j % 3, sudoku)) {
                     return false;
                 }
             }
@@ -277,36 +292,43 @@ public class Main extends Application {
     }
     
     public boolean isCorrect(int i, int j, int num, Main sudoku) {
+    	//used to revert the color if a number is changed in the sequence
         return isCompletedRow(i, sudoku) && isCompletedColumn(j, sudoku) && isCompletedBox(i - i % 3, j - j % 3, sudoku);
     }
-
+    
     public void revertColor(int i, int j, GridPane grid, Main sudoku) {
+    	// changes the color of the row is the button was previously green
         for (int k = 0; k < SIZE; k++) {
             Button rowButton = (Button) getNodeFromGridPane(grid, k, i);
-            rowButton.setStyle("-fx-background-color: white;");
-            
+            rowButton.setStyle("-fx-background-color: transparent;");
+            rowButton.setStyle("-fx-cursor-color: transparent;");
+         // changes the color of the column is the button was previously green
             Button colButton = (Button) getNodeFromGridPane(grid, j, k);
-            colButton.setStyle("-fx-background-color: white;");
+            colButton.setStyle("-fx-background-color: transparent;");
+            colButton.setStyle("-fx-cursor-color: transparent;");           
         }
         
         int boxRowStart = i - i % 3;
         int boxColStart = j - j % 3;
         for (int k = 0; k < 3; k++) {
             for (int l = 0; l < 3; l++) {
+            	// changes the color of the box is the button was previously green
                 Button boxButton = (Button) getNodeFromGridPane(grid, boxColStart + l, boxRowStart + k);
-                boxButton.setStyle("-fx-background-color: white;");
+                boxButton.setStyle("-fx-background-color: transparent;");
+                boxButton.setStyle("-fx-cursor-color: transparent;");
             }
         }
     }
 
     public Scene createWinScene(Stage primaryStage) {
+    	// displays the win screen when isComplete returns true 
         StackPane winPane = new StackPane();
         Text winText = new Text("You Win!");
         winText.setStyle("-fx-font-size: 24;");
         winPane.getChildren().add(winText);
         return new Scene(winPane, 200, 100);
     }
-
+    
     public javafx.scene.Node getNodeFromGridPane(GridPane gridPane, int col, int row) {
         for (javafx.scene.Node node : gridPane.getChildren()) {
             if (GridPane.getColumnIndex(node) != null && GridPane.getRowIndex(node) != null) {
